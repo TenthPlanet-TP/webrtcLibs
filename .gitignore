@@ -1,0 +1,12 @@
+.svn
+*.map
+*.bin
+*.o
+*.mod.c
+*.img
+*.o.cmd
+*.o.*
+.vscode
+**/CMakeFiles/
+**/install/
+build/android/
