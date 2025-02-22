@@ -40,6 +40,10 @@
 #define ALOGF(...) PRINT_MOD_A(ANDROID_LOG_FATAL, __VA_ARGS__)
 
 
+#define JAVA_CLASS   "com/genymobile/scrcpy/encodeStat/ToolKits"
+// #define JAVA_CLASS   "com/webrtc/utils/ToolKits"
+
+
 using namespace webrtc;
 
 
@@ -118,6 +122,7 @@ static jint nativeReleaseBitstreamParser(JNIEnv* env, jobject obj, jlong handle)
         ret = 0;
     }
 
+    ALOGD("g_handler_map size: %zu, handle: %" PRId64 "", g_handler_map.size(), handle);
     return ret;
 }
 
@@ -151,7 +156,7 @@ jint nativeParseBitstream(JNIEnv* env, jobject obj,
     jint limit = env->CallIntMethod(byteBuffer, limitMethodID);
 
     // 打印 position 和 limit 的值
-    ALOGD("Position: %d, Limit: %d\n", position, limit);
+    // ALOGD("Position: %d, Limit: %d\n", position, limit);
 
     size_t byteBufferLength = limit - position;
 
@@ -223,26 +228,31 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 	JNIEnv *env;
 	jclass cls;
 
+    ALOGI("JNI_OnLoad start\n");
+
     if (vm->GetEnv((void **)&env, JNI_VERSION_1_6) != JNI_OK) {
+        ALOGE("error, GetEnv failed");
         return -1;
     }
 
-	cls = env->FindClass("com/webrtc/utils");
+	cls = env->FindClass(JAVA_CLASS);
 	if (cls == nullptr) {
+        ALOGE("error, FindClass %s failed", JAVA_CLASS);
 		return JNI_ERR;
 	}
 
 	if (env->RegisterNatives(cls, methods, sizeof(methods)/sizeof(methods[0])) < 0) {
+        ALOGE("error, RegisterNatives failed");
 		return JNI_ERR;
     }
 
+    ALOGI("JNI_OnLoad end\n");
 	return JNI_VERSION_1_6;
 }
 
 #if 1
 JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* vm, void* reserved)
 {
-    // __android_log_print(ANDROID_LOG_INFO, "native", "JNI_OnUnload");
     ALOGI("JNI_OnUnload start\n");
 
 	JNIEnv *env;
@@ -252,12 +262,14 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* vm, void* reserved)
         return ;
     }
 
-	cls = env->FindClass("com/webrtc/utils");
+	cls = env->FindClass(JAVA_CLASS);
 	if (cls == nullptr) {
+        ALOGE("error, FindClass %s failed", JAVA_CLASS);
 		return ;
 	}
 
 	if (env->UnregisterNatives(cls) < 0) {
+        ALOGE("error, UnregisterNatives failed");
 		return ;
     }
     
